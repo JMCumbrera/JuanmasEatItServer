@@ -3,9 +3,7 @@ package com.dam.juanmaseatitserver;
 import static com.dam.juanmaseatitserver.Common.Common.convertCodeToStatus;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,17 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.dam.juanmaseatitserver.Common.Common;
 import com.dam.juanmaseatitserver.Interface.ItemClickListener;
-import com.dam.juanmaseatitserver.Model.Order;
 import com.dam.juanmaseatitserver.Model.Request;
 import com.dam.juanmaseatitserver.ViewHolder.OrderViewHolder;
 import com.dam.juanmaseatitserver.databinding.FragmentOrderStatusBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jaredrummler.materialspinner.MaterialSpinner;
-
-import java.util.Optional;
 
 public class OrderStatusFragment extends Fragment {
     // Atributos de clase
@@ -50,17 +44,8 @@ public class OrderStatusFragment extends Fragment {
 
         // Inicializamos
         recyclerView = binding.listOrders;
-        recyclerView.setHasFixedSize(false);
-        layoutManager = new LinearLayoutManager(root.getContext()){
-            @Override
-            public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-                try {
-                    super.onLayoutChildren(recycler, state);
-                } catch (IndexOutOfBoundsException e) {
-                    Log.e("TAG", "meet a IOOBE in RecyclerView");
-                }
-            }
-        };
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(root.getContext());
         recyclerView.setLayoutManager(layoutManager);
 
         // Cargamos los pedidos
@@ -70,45 +55,36 @@ public class OrderStatusFragment extends Fragment {
     }
 
     private void loadOrders(/*String phone*/) {
-
-        FirebaseRecyclerOptions<Request> options =
-                new FirebaseRecyclerOptions.Builder<Request>()
-                        .setQuery(requests.limitToLast(50), Request.class)
-                        .setLifecycleOwner(getViewLifecycleOwner())
-                        .build();
-
-        adapter = new FirebaseRecyclerAdapter<Request, OrderViewHolder>(options) {
+        adapter = new FirebaseRecyclerAdapter<Request, OrderViewHolder>(
+                Request.class,
+                R.layout.order_layout,
+                OrderViewHolder.class,
+                requests//.orderByChild("phone").equalTo(phone)
+        ) {
             @Override
-            protected void onBindViewHolder(@NonNull OrderViewHolder holder, int position, @NonNull Request model) {
-                holder.txtOrderId.setText(adapter.getRef(position).getKey());
-                holder.txtOrderStatus.setText(convertCodeToStatus(model.getStatus()));
-                holder.txtOrderAddress.setText(model.getAddress());
-                holder.txtOrderPhone.setText(model.getPhone());
+            protected void populateViewHolder(OrderViewHolder orderViewHolder, Request model, int position) {
+                orderViewHolder.txtOrderId.setText(adapter.getRef(position).getKey());
+                orderViewHolder.txtOrderStatus.setText(convertCodeToStatus(model.getStatus()));
+                orderViewHolder.txtOrderAddress.setText(model.getAddress());
+                orderViewHolder.txtOrderPhone.setText(model.getPhone());
 
                 // Nuevos eventos de botón
-                holder.btnEdit.setOnClickListener(view ->
-                        showUpdateOrderDialog(String.valueOf(adapter.getRef(position)), adapter.getItem(position), position)
-                );
+                orderViewHolder.btnEdit.setOnClickListener(view -> {
+                    showUpdateOrderDialog(String.valueOf(adapter.getRef(position)), adapter.getItem(position));
+                });
 
-                holder.btnRemove.setOnClickListener(view ->
-                        deleteOrder(adapter.getRef(position).getKey(), position)
-                );
+                orderViewHolder.btnRemove.setOnClickListener(view -> deleteOrder(adapter.getRef(position).getKey()));
 
-                holder.btnDetail.setOnClickListener(view -> {
+                orderViewHolder.btnDetail.setOnClickListener(view -> {
                     Intent orderDetail = new Intent(getContext(), OrderDetail.class);
                     Common.currentRequest = model;
                     orderDetail.putExtra("OrderId", adapter.getRef(position).getKey());
                     startActivity(orderDetail);
                 });
             }
-
-            @NonNull
-            @Override
-            public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new OrderViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.order_layout, parent, false));
-            }
         };
 
+        adapter.notifyDataSetChanged();
         recyclerView.setAdapter(adapter);
     }
 
@@ -123,7 +99,7 @@ public class OrderStatusFragment extends Fragment {
     //    return true;
     //}
 
-    private void showUpdateOrderDialog(String key, Request item, int position) {
+    private void showUpdateOrderDialog(String key, Request item) {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(binding.getRoot().getContext());
         alertDialog.setTitle("Actualizar pedido");
         alertDialog.setMessage("Por favor, elija un estado: ");
@@ -144,7 +120,7 @@ public class OrderStatusFragment extends Fragment {
                 item.setStatus(String.valueOf(spinner.getSelectedIndex()));
 
                 requests.child(localKey).setValue(item);
-                adapter.notifyItemChanged(position);
+                adapter.notifyDataSetChanged();
             }
         });
 
@@ -158,8 +134,8 @@ public class OrderStatusFragment extends Fragment {
         alertDialog.show();
     }
 
-    private void deleteOrder(String key, int position) {
+    private void deleteOrder(String key) {
         requests.child(key).removeValue();
-        adapter.notifyItemRemoved(position);
+        adapter.notifyDataSetChanged();
     }
 }

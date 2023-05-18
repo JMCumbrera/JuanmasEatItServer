@@ -11,14 +11,10 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -27,10 +23,8 @@ import com.dam.juanmaseatitserver.Common.Common;
 import com.dam.juanmaseatitserver.Interface.ItemClickListener;
 import com.dam.juanmaseatitserver.Model.Category;
 import com.dam.juanmaseatitserver.Model.Food;
-import com.dam.juanmaseatitserver.Model.Request;
 import com.dam.juanmaseatitserver.ViewHolder.FoodViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -44,7 +38,6 @@ import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.squareup.picasso.Picasso;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class FoodList extends AppCompatActivity {
@@ -58,7 +51,7 @@ public class FoodList extends AppCompatActivity {
     DatabaseReference foodList;
     FirebaseStorage storage;
     StorageReference storageReference;
-    String categoryId="";
+    String categoryId = "";
     FirebaseRecyclerAdapter<Food, FoodViewHolder> adapter;
 
     // Añadir plato nuevo
@@ -79,58 +72,25 @@ public class FoodList extends AppCompatActivity {
         storageReference = storage.getReference();
 
         // Inicializamos
-        recyclerView = (RecyclerView)findViewById(R.id.recycler_food);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_food);
         recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this){
-            @Override
-            public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-                try {
-                    super.onLayoutChildren(recycler, state);
-                } catch (IndexOutOfBoundsException e) {
-                    Log.e("TAG", "meet a IOOBE in RecyclerView");
-                }
-            }
-        };
+        layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        rootLayout = (RelativeLayout)findViewById(R.id.rootLayout);
+        rootLayout = (RelativeLayout) findViewById(R.id.rootLayout);
 
-        fab = (FloatingActionButton)findViewById(R.id.fab);
+        /*fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showAddFoodDialog();
             }
-        });
+        });*/
 
         if (getIntent() != null)
             categoryId = getIntent().getStringExtra("CategoryId");
         if (categoryId.isEmpty())
             loadListFood(categoryId);
-    }
-
-    @Override
-    protected void onStart() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Optional.ofNullable(adapter).ifPresent(FirebaseRecyclerAdapter::startListening);
-        }
-        super.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Optional.ofNullable(adapter).ifPresent(FirebaseRecyclerAdapter::startListening);
-        }
-        super.onResume();
-    }
-
-    @Override
-    public void onStop() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Optional.ofNullable(adapter).ifPresent(FirebaseRecyclerAdapter::stopListening);
-        }
-        super.onStop();
     }
 
     private void showAddFoodDialog() {
@@ -151,43 +111,26 @@ public class FoodList extends AppCompatActivity {
 
 
         // Evento para el botón
-        btnSelect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { chooseImage(); }
-        });
+        btnSelect.setOnClickListener(view -> chooseImage());
 
-        btnUpload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                uploadImage();
-            }
-        });
+        btnUpload.setOnClickListener(view -> uploadImage());
 
         alertDialog.setView(add_menu_layout);
         alertDialog.setIcon(R.drawable.baseline_shopping_cart_24);
 
         // Establecemos el botón
-        alertDialog.setPositiveButton("SÍ", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+        alertDialog.setPositiveButton("SÍ", (dialog, which) -> {
+            dialog.dismiss();
 
-                // Aquí creamos una categoría nueva
-                if (newFood != null) {
-                    foodList.push().setValue(newFood);
-                    Snackbar.make(rootLayout, "El plato nuevo " + newFood.getName() + " fue añadido", Snackbar.LENGTH_SHORT)
-                            .show();
-                }
+            // Aquí creamos una categoría nueva
+            if (newFood != null) {
+                foodList.push().setValue(newFood);
+                Snackbar.make(rootLayout, "El plato nuevo " + newFood.getName() + " fue añadido", Snackbar.LENGTH_SHORT)
+                        .show();
             }
         });
 
-        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-            }
-        });
+        alertDialog.setNegativeButton("NO", (dialog, which) -> dialog.dismiss());
 
         alertDialog.show();
     }
@@ -211,7 +154,7 @@ public class FoodList extends AppCompatActivity {
                                 public void onSuccess(Uri uri) {
                                     // Establecemos valor para newCategory si la imagen es subida, de modo que obtenemos un enlace de descarga
                                     newFood = new Food();
-                                    newFood .setName(edtName.getText().toString());
+                                    newFood.setName(edtName.getText().toString());
                                     newFood.setDescription(edtDescription.getText().toString());
                                     newFood.setPrice(edtPrice.getText().toString());
                                     newFood.setDescription(edtDescription.getText().toString());
@@ -244,30 +187,21 @@ public class FoodList extends AppCompatActivity {
     }
 
     private void loadListFood(String categoryId) {
-        FirebaseRecyclerOptions<Food> options =
-                new FirebaseRecyclerOptions.Builder<Food>()
-                        .setQuery(foodList.limitToLast(50), Food.class)
-                        .build();
-        adapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(options) {
-            @NonNull
+        adapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(
+                Food.class,
+                R.layout.food_item,
+                FoodViewHolder.class,
+                foodList.orderByChild("menuId").equalTo(categoryId)
+        ) {
             @Override
-            public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new FoodViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.food_item, parent, false));
-            }
-
-            @Override
-            protected void onBindViewHolder(@NonNull FoodViewHolder holder, int position, @NonNull Food model) {
-                holder.food_name.setText(model.getName());
+            protected void populateViewHolder(FoodViewHolder foodViewHolder, Food food, int i) {
+                foodViewHolder.food_name.setText(food.getName());
+                foodViewHolder.food_price.setText(String.format("%s €", food.getPrice().toString()));
                 Picasso.with(getBaseContext())
-                        .load(model.getImage())
-                        .into(holder.food_image);
+                        .load(food.getImage())
+                        .into(foodViewHolder.food_image);
 
-                holder.setItemClickListener(new ItemClickListener() {
-                    @Override
-                    public void onClick(View view, int position, boolean isLongClick) {
-
-                    }
-                });
+                foodViewHolder.setItemClickListener((view, position, isLongClick) -> {});
             }
         };
         adapter.notifyDataSetChanged();
@@ -328,7 +262,9 @@ public class FoodList extends AppCompatActivity {
         // Evento para el botón
         btnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { chooseImage(); }
+            public void onClick(View view) {
+                chooseImage();
+            }
         });
 
         btnUpload.setOnClickListener(new View.OnClickListener() {
@@ -361,7 +297,9 @@ public class FoodList extends AppCompatActivity {
 
         alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) { dialog.dismiss(); }
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
         });
 
         alertDialog.show();
