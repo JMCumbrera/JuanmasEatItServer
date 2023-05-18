@@ -11,10 +11,14 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -23,8 +27,10 @@ import com.dam.juanmaseatitserver.Common.Common;
 import com.dam.juanmaseatitserver.Interface.ItemClickListener;
 import com.dam.juanmaseatitserver.Model.Category;
 import com.dam.juanmaseatitserver.Model.Food;
+import com.dam.juanmaseatitserver.Model.Request;
 import com.dam.juanmaseatitserver.ViewHolder.FoodViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -38,6 +44,7 @@ import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.squareup.picasso.Picasso;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class FoodList extends AppCompatActivity {
@@ -74,7 +81,16 @@ public class FoodList extends AppCompatActivity {
         // Inicializamos
         recyclerView = (RecyclerView)findViewById(R.id.recycler_food);
         recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
+        layoutManager = new LinearLayoutManager(this){
+            @Override
+            public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+                try {
+                    super.onLayoutChildren(recycler, state);
+                } catch (IndexOutOfBoundsException e) {
+                    Log.e("TAG", "meet a IOOBE in RecyclerView");
+                }
+            }
+        };
         recyclerView.setLayoutManager(layoutManager);
 
         rootLayout = (RelativeLayout)findViewById(R.id.rootLayout);
@@ -91,6 +107,30 @@ public class FoodList extends AppCompatActivity {
             categoryId = getIntent().getStringExtra("CategoryId");
         if (categoryId.isEmpty())
             loadListFood(categoryId);
+    }
+
+    @Override
+    protected void onStart() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Optional.ofNullable(adapter).ifPresent(FirebaseRecyclerAdapter::startListening);
+        }
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Optional.ofNullable(adapter).ifPresent(FirebaseRecyclerAdapter::startListening);
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void onStop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Optional.ofNullable(adapter).ifPresent(FirebaseRecyclerAdapter::stopListening);
+        }
+        super.onStop();
     }
 
     private void showAddFoodDialog() {
@@ -204,20 +244,25 @@ public class FoodList extends AppCompatActivity {
     }
 
     private void loadListFood(String categoryId) {
-        adapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(
-                Food.class,
-                R.layout.food_item,
-                FoodViewHolder.class,
-                foodList.orderByChild("menuId").equalTo(categoryId)
-        ) {
+        FirebaseRecyclerOptions<Food> options =
+                new FirebaseRecyclerOptions.Builder<Food>()
+                        .setQuery(foodList.limitToLast(50), Food.class)
+                        .build();
+        adapter = new FirebaseRecyclerAdapter<Food, FoodViewHolder>(options) {
+            @NonNull
             @Override
-            protected void populateViewHolder(FoodViewHolder foodViewHolder, Food model, int i) {
-                foodViewHolder.food_name.setText(model.getName());
+            public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new FoodViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.food_item, parent, false));
+            }
+
+            @Override
+            protected void onBindViewHolder(@NonNull FoodViewHolder holder, int position, @NonNull Food model) {
+                holder.food_name.setText(model.getName());
                 Picasso.with(getBaseContext())
                         .load(model.getImage())
-                        .into(foodViewHolder.food_image);
+                        .into(holder.food_image);
 
-                foodViewHolder.setItemClickListener(new ItemClickListener() {
+                holder.setItemClickListener(new ItemClickListener() {
                     @Override
                     public void onClick(View view, int position, boolean isLongClick) {
 

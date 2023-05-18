@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,9 +25,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.dam.juanmaseatitserver.Common.Common;
 import com.dam.juanmaseatitserver.Interface.ItemClickListener;
 import com.dam.juanmaseatitserver.Model.Category;
+import com.dam.juanmaseatitserver.Model.Request;
 import com.dam.juanmaseatitserver.ViewHolder.MenuViewHolder;
 import com.dam.juanmaseatitserver.databinding.FragmentHomeBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -37,6 +41,7 @@ import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.squareup.picasso.Picasso;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class HomeFragment extends Fragment {
@@ -67,7 +72,16 @@ public class HomeFragment extends Fragment {
         // Cargamos el menú
         recycler_menu = binding.recyclerHome;
         recycler_menu.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(root.getContext());
+        layoutManager = new LinearLayoutManager(root.getContext()){
+            @Override
+            public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+                try {
+                    super.onLayoutChildren(recycler, state);
+                } catch (IndexOutOfBoundsException e) {
+                    Log.e("TAG", "meet a IOOBE in RecyclerView");
+                }
+            }
+        };
         recycler_menu.setLayoutManager(layoutManager);
 
         loadMenu(root.getContext());
@@ -76,29 +90,36 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadMenu(Context context) {
-        adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(Category.class, R.layout.menu_item, MenuViewHolder.class, category) {
+        FirebaseRecyclerOptions<Category> options =
+                new FirebaseRecyclerOptions.Builder<Category>()
+                        .setQuery(category.limitToLast(50), Category.class)
+                        .setLifecycleOwner(getViewLifecycleOwner())
+                        .build();
+        adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(options) {
+            @NonNull
             @Override
-            protected void populateViewHolder(MenuViewHolder viewHolder, Category model, int position) {
-                viewHolder.txtMenuName.setText(model.getName());
+            public MenuViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new MenuViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.menu_item, parent, false));
+            }
+
+            @Override
+            protected void onBindViewHolder(@NonNull MenuViewHolder holder, int position, @NonNull Category model) {
+                holder.txtMenuName.setText(model.getName());
 
                 Picasso.with(context).load(model.getImage())
-                        .into(viewHolder.imageView);
+                        .into(holder.imageView);
 
-                Category clickItem = model;
+                holder.setItemClickListener((view, position1, isLongClick) -> {
+                    // Get CategoryId and send to new Activity
+                    Intent foodList = new Intent(context, FoodList.class);
 
-                viewHolder.setItemClickListener(new ItemClickListener() {
-                    @Override
-                    public void onClick(View view, int position, boolean isLongClick) {
-                        // Get CategoryId and send to new Activity
-                        Intent foodList = new Intent(context, FoodList.class);
-
-                        // Because CategoryId is key, so we just get the key of this item
-                        foodList.putExtra("CategoryId", adapter.getRef(position).getKey());
-                        startActivity(foodList);
-                    }
+                    // Because CategoryId is key, so we just get the key of this item
+                    foodList.putExtra("CategoryId", adapter.getRef(position1).getKey());
+                    startActivity(foodList);
                 });
             }
         };
+
         recycler_menu.setAdapter(adapter);
     }
 
