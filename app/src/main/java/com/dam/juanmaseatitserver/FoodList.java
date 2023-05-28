@@ -51,7 +51,7 @@ public class FoodList extends AppCompatActivity {
     DatabaseReference foodList;
     FirebaseStorage storage;
     StorageReference storageReference;
-    String categoryId="";
+    String categoryId = "";
     FirebaseRecyclerAdapter<Food, FoodViewHolder> adapter;
 
     // Añadir plato nuevo
@@ -72,20 +72,20 @@ public class FoodList extends AppCompatActivity {
         storageReference = storage.getReference();
 
         // Inicializamos
-        recyclerView = (RecyclerView)findViewById(R.id.recycler_food);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_food);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        rootLayout = (RelativeLayout)findViewById(R.id.rootLayout);
+        rootLayout = (RelativeLayout) findViewById(R.id.rootLayout);
 
-        fab = (FloatingActionButton)findViewById(R.id.fab);
+        /*fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showAddFoodDialog();
             }
-        });
+        });*/
 
         if (getIntent() != null)
             categoryId = getIntent().getStringExtra("CategoryId");
@@ -111,43 +111,26 @@ public class FoodList extends AppCompatActivity {
 
 
         // Evento para el botón
-        btnSelect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { chooseImage(); }
-        });
+        btnSelect.setOnClickListener(view -> chooseImage());
 
-        btnUpload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                uploadImage();
-            }
-        });
+        btnUpload.setOnClickListener(view -> uploadImage());
 
         alertDialog.setView(add_menu_layout);
         alertDialog.setIcon(R.drawable.baseline_shopping_cart_24);
 
         // Establecemos el botón
-        alertDialog.setPositiveButton("SÍ", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+        alertDialog.setPositiveButton("SÍ", (dialog, which) -> {
+            dialog.dismiss();
 
-                // Aquí creamos una categoría nueva
-                if (newFood != null) {
-                    foodList.push().setValue(newFood);
-                    Snackbar.make(rootLayout, "El plato nuevo " + newFood.getName() + " fue añadido", Snackbar.LENGTH_SHORT)
-                            .show();
-                }
+            // Aquí creamos una categoría nueva
+            if (newFood != null) {
+                foodList.push().setValue(newFood);
+                Snackbar.make(rootLayout, "El plato nuevo " + newFood.getName() + " fue añadido", Snackbar.LENGTH_SHORT)
+                        .show();
             }
         });
 
-        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-            }
-        });
+        alertDialog.setNegativeButton("NO", (dialog, which) -> dialog.dismiss());
 
         alertDialog.show();
     }
@@ -171,7 +154,7 @@ public class FoodList extends AppCompatActivity {
                                 public void onSuccess(Uri uri) {
                                     // Establecemos valor para newCategory si la imagen es subida, de modo que obtenemos un enlace de descarga
                                     newFood = new Food();
-                                    newFood .setName(edtName.getText().toString());
+                                    newFood.setName(edtName.getText().toString());
                                     newFood.setDescription(edtDescription.getText().toString());
                                     newFood.setPrice(edtPrice.getText().toString());
                                     newFood.setDescription(edtDescription.getText().toString());
@@ -211,18 +194,14 @@ public class FoodList extends AppCompatActivity {
                 foodList.orderByChild("menuId").equalTo(categoryId)
         ) {
             @Override
-            protected void populateViewHolder(FoodViewHolder foodViewHolder, Food model, int i) {
-                foodViewHolder.food_name.setText(model.getName());
+            protected void populateViewHolder(FoodViewHolder foodViewHolder, Food food, int i) {
+                foodViewHolder.food_name.setText(food.getName());
+                foodViewHolder.food_price.setText(String.format("%s €", food.getPrice().toString()));
                 Picasso.with(getBaseContext())
-                        .load(model.getImage())
+                        .load(food.getImage())
                         .into(foodViewHolder.food_image);
 
-                foodViewHolder.setItemClickListener(new ItemClickListener() {
-                    @Override
-                    public void onClick(View view, int position, boolean isLongClick) {
-
-                    }
-                });
+                foodViewHolder.setItemClickListener((view, position, isLongClick) -> {});
             }
         };
         adapter.notifyDataSetChanged();
@@ -283,7 +262,9 @@ public class FoodList extends AppCompatActivity {
         // Evento para el botón
         btnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { chooseImage(); }
+            public void onClick(View view) {
+                chooseImage();
+            }
         });
 
         btnUpload.setOnClickListener(new View.OnClickListener() {
@@ -316,7 +297,9 @@ public class FoodList extends AppCompatActivity {
 
         alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) { dialog.dismiss(); }
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
         });
 
         alertDialog.show();

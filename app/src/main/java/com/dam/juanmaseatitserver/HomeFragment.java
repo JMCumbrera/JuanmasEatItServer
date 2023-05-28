@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -67,8 +68,9 @@ public class HomeFragment extends Fragment {
         // Cargamos el menú
         recycler_menu = binding.recyclerHome;
         recycler_menu.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(root.getContext());
-        recycler_menu.setLayoutManager(layoutManager);
+        //layoutManager = new LinearLayoutManager(root.getContext());
+        //recycler_menu.setLayoutManager(layoutManager);
+        recycler_menu.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         loadMenu(root.getContext());
 

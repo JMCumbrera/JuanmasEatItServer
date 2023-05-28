@@ -300,28 +300,35 @@ public class Home extends AppCompatActivity {
             android.app.AlertDialog waitingDialog = new SpotsDialog(Home.this);
             waitingDialog.show();
 
-            // Comprobamos la contraseña anterior
-            if (edtPassword.getText().toString().equals(Common.currentUser.getPassword())) {
-                // Comprobamos la contraseña nueva y la repetimos
-                if (edtNewPassword.getText().toString().equals(edtRepeatPassword.getText().toString())) {
-                    Map<String, Object> passwordUpdate = new HashMap<>();
-                    passwordUpdate.put("Password", edtNewPassword.getText().toString());
+            if (edtPassword.getText().toString().isEmpty() ||
+                    edtNewPassword.getText().toString().isEmpty() ||
+                    edtRepeatPassword.getText().toString().isEmpty()) {
+                waitingDialog.dismiss();
+                Toast.makeText(this, "Por favor, rellene todos los campos", Toast.LENGTH_SHORT).show();
+            } else {
+                // Comprobamos la contraseña anterior
+                if (edtPassword.getText().toString().equals(Common.currentUser.getPassword())) {
+                    // Comprobamos la contraseña nueva y la repetimos
+                    if (edtNewPassword.getText().toString().equals(edtRepeatPassword.getText().toString())) {
+                        Map<String, Object> passwordUpdate = new HashMap<>();
+                        passwordUpdate.put("Password", edtNewPassword.getText().toString());
 
-                    // Llevamos la actualización
-                    DatabaseReference user = FirebaseDatabase.getInstance().getReference("User");
-                    user.child(Common.currentUser.getPhone())
-                            .updateChildren(passwordUpdate)
-                            .addOnCompleteListener(task -> {
-                                waitingDialog.dismiss();
-                                Toast.makeText(Home.this, "La contraseña fue actualizada", Toast.LENGTH_SHORT).show();
-                            }).addOnFailureListener(e -> Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                        // Llevamos la actualización
+                        DatabaseReference user = FirebaseDatabase.getInstance().getReference("User");
+                        user.child(Common.currentUser.getPhone())
+                                .updateChildren(passwordUpdate)
+                                .addOnCompleteListener(task -> {
+                                    waitingDialog.dismiss();
+                                    Toast.makeText(Home.this, "La contraseña fue actualizada", Toast.LENGTH_SHORT).show();
+                                }).addOnFailureListener(e -> Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                    } else {
+                        waitingDialog.dismiss();
+                        Toast.makeText(Home.this, "Las contraseñas introducidas no coinciden", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     waitingDialog.dismiss();
-                    Toast.makeText(Home.this, "Las contraseñas introducidas no coinciden", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Home.this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                waitingDialog.dismiss();
-                Toast.makeText(Home.this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
             }
         });
 
