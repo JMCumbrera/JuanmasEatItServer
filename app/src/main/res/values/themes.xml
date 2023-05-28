@@ -20,6 +20,8 @@
     <style name="Theme.JuanmasEatItServer.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <!-- Esto desabilita el Splash Screen de Android -->
+        <item name="android:windowDisablePreview">true</item>
     </style>
 
     <style name="Theme.JuanmasEatItServer.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
