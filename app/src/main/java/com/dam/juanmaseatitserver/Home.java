@@ -257,11 +257,9 @@ public class Home extends AppCompatActivity {
                 switch (item.getItemId()) {
                     case (R.id.nav_menu):
                         navController.navigate(R.id.nav_home);
-                        Toast.makeText(Home.this, "Menu", Toast.LENGTH_SHORT).show();
                         return true;
                     case (R.id.nav_orders):
                         navController.navigate(R.id.nav_order_status);
-                        Toast.makeText(Home.this, "Order status", Toast.LENGTH_SHORT).show();
                         return true;
                     case (R.id.nav_sign_out):
                         Intent intent = new Intent(Home.this, MainActivity.class);
