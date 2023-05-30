@@ -4,9 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,10 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
 import com.dam.juanmaseatitserver.Common.Common;
-import com.dam.juanmaseatitserver.Interface.ItemClickListener;
-import com.dam.juanmaseatitserver.Model.Category;
 import com.dam.juanmaseatitserver.Model.Food;
 import com.dam.juanmaseatitserver.ViewHolder.FoodViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -37,13 +34,15 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.squareup.picasso.Picasso;
-
 import java.util.UUID;
 
+/**
+ * Clase encargada de mostrar la lista de platos en cada categoría.
+ */
 public class FoodList extends AppCompatActivity {
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
-    RelativeLayout rootLayout;
+    ConstraintLayout rootLayout;
     FloatingActionButton fab;
 
     // Firebase
@@ -77,19 +76,19 @@ public class FoodList extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        rootLayout = (RelativeLayout) findViewById(R.id.rootLayout);
+        rootLayout = (ConstraintLayout) findViewById(R.id.rootLayout);
 
-        /*fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showAddFoodDialog();
             }
-        });*/
+        });
 
         if (getIntent() != null)
             categoryId = getIntent().getStringExtra("CategoryId");
-        if (categoryId.isEmpty())
+        if (!categoryId.isEmpty())
             loadListFood(categoryId);
     }
 
@@ -144,37 +143,28 @@ public class FoodList extends AppCompatActivity {
             String imageName = UUID.randomUUID().toString();
             StorageReference imageFolder = storageReference.child("images/" + imageName);
             imageFolder.putFile(saveUri)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            mDialog.dismiss();
-                            Toast.makeText(FoodList.this, "¡Imagen subida!", Toast.LENGTH_SHORT).show();
-                            imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    // Establecemos valor para newCategory si la imagen es subida, de modo que obtenemos un enlace de descarga
-                                    newFood = new Food();
-                                    newFood.setName(edtName.getText().toString());
-                                    newFood.setDescription(edtDescription.getText().toString());
-                                    newFood.setPrice(edtPrice.getText().toString());
-                                    newFood.setDescription(edtDescription.getText().toString());
-                                    newFood.setMenuId(categoryId);
-                                    newFood.setImage(uri.toString());
-                                }
-                            });
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            mDialog.dismiss();
-                            Toast.makeText(FoodList.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                            double progress = (100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
-                            mDialog.setMessage("Subido " + progress + "%");
-                        }
+                    .addOnSuccessListener(taskSnapshot -> {
+                        mDialog.dismiss();
+                        Toast.makeText(FoodList.this, "¡Imagen subida!", Toast.LENGTH_SHORT).show();
+                        imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                // Establecemos valor para newCategory si la imagen es subida, de modo que obtenemos un enlace de descarga
+                                newFood = new Food();
+                                newFood.setName(edtName.getText().toString());
+                                newFood.setDescription(edtDescription.getText().toString());
+                                newFood.setPrice(edtPrice.getText().toString());
+                                newFood.setDescription(edtDescription.getText().toString());
+                                newFood.setMenuId(categoryId);
+                                newFood.setImage(uri.toString());
+                            }
+                        });
+                    }).addOnFailureListener(exception -> {
+                        mDialog.dismiss();
+                        Toast.makeText(FoodList.this, "" + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                    }).addOnProgressListener(snapshot -> {
+                        double progress = (100.0 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
+                        mDialog.setMessage("Subido " + progress + "%");
                     });
         }
     }
@@ -183,7 +173,7 @@ public class FoodList extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Seleecione una imagen"), Common.PICK_IMAGE_REQUEST);
+        startActivityForResult(Intent.createChooser(intent, "Seleccione una imagen"), Common.PICK_IMAGE_REQUEST);
     }
 
     private void loadListFood(String categoryId) {
