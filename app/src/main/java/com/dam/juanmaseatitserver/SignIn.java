@@ -148,15 +148,19 @@ public class SignIn extends AppCompatActivity {
             table_user.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    User user = dataSnapshot.child(Objects.requireNonNull(edtPhone.getText()).toString()).getValue(User.class);
+                    if (dataSnapshot.child(edtPhone.getText().toString()).exists()) {
+                        User user = dataSnapshot.child(edtPhone.getText().toString()).getValue(User.class);
 
-                    if (edtPhone.getText().toString().isEmpty() || edtSecureCode.getText().toString().isEmpty()) {
-                        Toast.makeText(SignIn.this, "Por favor, rellene todos los campos", Toast.LENGTH_SHORT).show();
+                        if (edtPhone.getText().toString().isEmpty() || edtSecureCode.getText().toString().isEmpty()) {
+                            Toast.makeText(SignIn.this, "Por favor, rellene todos los campos", Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (user != null && user.getSecureCode().equals(edtSecureCode.getText().toString()))
+                                Toast.makeText(SignIn.this, "Su contraseña es: " + user.getPassword(), Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(SignIn.this, "Código de seguridad incorrecto", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
-                        if (user.getSecureCode().equals(edtSecureCode.getText().toString()))
-                            Toast.makeText(SignIn.this, "Su contraseña es: " + user.getPassword(), Toast.LENGTH_LONG).show();
-                        else
-                            Toast.makeText(SignIn.this, "Código de seguridad incorrecto", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignIn.this, "El usuario no existe en la BD", Toast.LENGTH_SHORT).show();
                     }
                 }
 
