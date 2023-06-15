@@ -79,7 +79,12 @@ public class OrderStatusFragment extends Fragment {
                     }
                 });
 
-                orderViewHolder.btnRemove.setOnClickListener(view -> deleteOrder(adapter.getRef(position).getKey()));
+                orderViewHolder.btnRemove.setOnClickListener(view -> {
+                    int currentPosition = orderViewHolder.getAdapterPosition();
+                    if (currentPosition != RecyclerView.NO_POSITION) {
+                        deleteOrder(adapter.getRef(currentPosition).getKey());
+                    }
+                });
 
                 orderViewHolder.btnDetail.setOnClickListener(view -> {
                     int currentPosition = orderViewHolder.getAdapterPosition();
