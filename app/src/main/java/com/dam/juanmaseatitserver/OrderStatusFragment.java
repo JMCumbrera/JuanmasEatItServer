@@ -82,10 +82,13 @@ public class OrderStatusFragment extends Fragment {
                 orderViewHolder.btnRemove.setOnClickListener(view -> deleteOrder(adapter.getRef(position).getKey()));
 
                 orderViewHolder.btnDetail.setOnClickListener(view -> {
-                    Intent orderDetail = new Intent(getContext(), OrderDetail.class);
-                    Common.currentRequest = model;
-                    orderDetail.putExtra("OrderId", adapter.getRef(position).getKey());
-                    startActivity(orderDetail);
+                    int currentPosition = orderViewHolder.getAdapterPosition();
+                    if (currentPosition != RecyclerView.NO_POSITION) {
+                        Intent orderDetail = new Intent(getContext(), OrderDetail.class);
+                        Common.currentRequest = model;
+                        orderDetail.putExtra("OrderId", adapter.getRef(currentPosition).getKey());
+                        startActivity(orderDetail);
+                    }
                 });
             }
         };
