@@ -2,7 +2,6 @@ package com.dam.juanmaseatitserver;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,34 +11,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.dam.juanmaseatitserver.Common.Common;
 import com.dam.juanmaseatitserver.Interface.ItemClickListener;
 import com.dam.juanmaseatitserver.Model.Category;
 import com.dam.juanmaseatitserver.ViewHolder.MenuViewHolder;
 import com.dam.juanmaseatitserver.databinding.FragmentHomeBinding;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
 import com.squareup.picasso.Picasso;
-
 import java.util.UUID;
 
+/**
+ * Fragmento que representa la pantalla principal de la aplicación (Home)
+ */
 public class HomeFragment extends Fragment {
     // Attributos de clase
     private FragmentHomeBinding binding;
@@ -68,8 +61,6 @@ public class HomeFragment extends Fragment {
         // Cargamos el menú
         recycler_menu = binding.recyclerHome;
         recycler_menu.setHasFixedSize(true);
-        //layoutManager = new LinearLayoutManager(root.getContext());
-        //recycler_menu.setLayoutManager(layoutManager);
         recycler_menu.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         loadMenu(root.getContext());
@@ -77,6 +68,10 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
+    /**
+     * Método que carga el menú desde Firebase y lo muestra en el Recycler View
+     * @param context El contexto de la aplicación
+     */
     private void loadMenu(Context context) {
         adapter = new FirebaseRecyclerAdapter<Category, MenuViewHolder>(Category.class, R.layout.menu_item, MenuViewHolder.class, category) {
             @Override
@@ -128,6 +123,11 @@ public class HomeFragment extends Fragment {
         Toast.makeText(root.getContext(), "¡Categoría eliminada!", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Método que mostrará un cuadro de diálogo para actualizar una categoría
+     * @param key Clave identificadora de la categoría
+     * @param item Categoría que vamos a actualizar
+     */
     private void showUpdateDialog(String key, Category item) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(root.getContext());
         alertDialog.setTitle("Actualizar categoría");
@@ -167,6 +167,10 @@ public class HomeFragment extends Fragment {
         alertDialog.show();
     }
 
+    /**
+     * Método que otorga la capacidad de elegir una imagen del dispositivo Android, parfra poder
+     * utilizarla al actualizar, editar o crear una categoría nueva
+     */
     private void chooseImage() {
         Intent intent = new Intent();
         intent.setType("image/*");

@@ -3,13 +3,14 @@ package com.dam.juanmaseatitserver;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Bundle;
 import android.widget.TextView;
-
 import com.dam.juanmaseatitserver.Common.Common;
 import com.dam.juanmaseatitserver.ViewHolder.OrderDetailAdapter;
 
+/**
+ * Clase encargada de los detalles de los pedidos
+ */
 public class OrderDetail extends AppCompatActivity {
     // Atributos de clase
     TextView order_id, order_phone, order_address, order_total, order_comment;

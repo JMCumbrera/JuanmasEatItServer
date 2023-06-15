@@ -21,6 +21,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
+/**
+ * Fragmento que muestra el estado de los pedidos realizados
+ */
 public class OrderStatusFragment extends Fragment {
     // Atributos de clase
     private FragmentOrderStatusBinding binding;
@@ -51,11 +54,9 @@ public class OrderStatusFragment extends Fragment {
         return root;
     }
 
-    private String sanitizeKey(String key) {
-        String sanitizedKey = key.replaceAll("[.#$\\[\\]]", "_");
-        return sanitizedKey;
-    }
-
+    /**
+     * Este método carga la lista de pedidos
+     */
     private void loadOrders() {
         adapter = new FirebaseRecyclerAdapter<Request, OrderViewHolder>(
                 Request.class,
@@ -71,11 +72,6 @@ public class OrderStatusFragment extends Fragment {
                 orderViewHolder.txtOrderPhone.setText(model.getPhone());
 
                 // Nuevos eventos de botón
-                /*orderViewHolder.btnEdit.setOnClickListener(view -> {
-                    if (position >= 0 && position < adapter.getItemCount()) {
-                        showUpdateOrderDialog(adapter.getRef(position).getKey(), adapter.getItem(position), orderViewHolder);
-                    }
-                });*/
                 orderViewHolder.btnEdit.setOnClickListener(view -> {
                     int currentPosition = orderViewHolder.getAdapterPosition();
                     if (currentPosition != RecyclerView.NO_POSITION) {
@@ -98,6 +94,14 @@ public class OrderStatusFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 
+    /**
+     * Método que muestra un cuadro de diálogo con la capacidad de actualizar el estado de
+     * preparación de un pedido
+     * @param key Clave del pedido
+     * @param item Elemento (pedido) en cuestión
+     * @param orderViewHolder Objeto de tipo OrderViewHolder, que tiene relación con los pedidos de
+     *                        la aplicación
+     */
     private void showUpdateOrderDialog(String key, Request item, OrderViewHolder orderViewHolder) {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(binding.getRoot().getContext());
         alertDialog.setTitle("Actualizar pedido");

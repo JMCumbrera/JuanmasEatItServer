@@ -1,5 +1,8 @@
 package com.dam.juanmaseatitserver.Model;
 
+/**
+ * En esta clase se crean los platos de comida del restaurante
+ */
 public class Food {
     // Atributos relacionados con los campos de la BD
     private String Name, Image, Description, Price, Discount, MenuId;

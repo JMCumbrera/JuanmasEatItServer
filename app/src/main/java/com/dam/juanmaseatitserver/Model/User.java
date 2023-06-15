@@ -1,5 +1,8 @@
 package com.dam.juanmaseatitserver.Model;
 
+/**
+ * Clase que representa a los usuarios de la aplicación
+ */
 public class User {
     // Atributos de clase
     private String Name, Password, Phone, IsStaff, secureCode;
