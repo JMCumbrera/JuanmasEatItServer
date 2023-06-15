@@ -9,6 +9,7 @@ import com.dam.juanmaseatitserver.Model.User;
 
 // Usuario actual logueado
 public class Common {
+    // Atributos de clase
     public static User currentUser;
     public static Request currentRequest;
     public static final String UPDATE = "Actualizar";

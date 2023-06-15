@@ -54,7 +54,7 @@
             android:text=""
             android:textColor="@color/colorPrimary"
             android:textSize="34sp"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             app:met_baseColor="@color/colorPrimary"
             app:met_floatingLabel="highlight"
             app:met_primaryColor="@color/colorPrimary"
@@ -70,7 +70,7 @@
             android:text=""
             android:textColor="@color/colorPrimary"
             android:textSize="34sp"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             app:met_baseColor="@color/colorPrimary"
             app:met_floatingLabel="highlight"
             app:met_primaryColor="@color/colorPrimary"
@@ -94,6 +94,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:backgroundTint="@android:color/holo_blue_bright"
                 app:cornerRadius="4dp" />
 
             <Button
@@ -107,6 +108,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:backgroundTint="@android:color/holo_purple"
                 app:cornerRadius="4dp" />
 
         </LinearLayout>

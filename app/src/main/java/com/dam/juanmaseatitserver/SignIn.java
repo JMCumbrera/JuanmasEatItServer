@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.dam.juanmaseatitserver.Common.Common;
 import com.dam.juanmaseatitserver.Model.User;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -22,11 +21,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.rengwuxian.materialedittext.MaterialEditText;
-
 import java.util.Objects;
-
 import io.paperdb.Paper;
 
+/**
+ * Clase necesaria para iniciar sesión en la aplicación
+ */
 public class SignIn extends AppCompatActivity {
     // Atributos de clase
     EditText edtPhone, edtPassword;
@@ -59,6 +59,11 @@ public class SignIn extends AppCompatActivity {
         btnSignIn.setOnClickListener(view -> signInUser(edtPhone.getText().toString(), edtPassword.getText().toString()));
     }
 
+    /**
+     * Método que permite iniciar sesión sesión en la aplicación
+     * @param phone Teléfono del usuario
+     * @param password Contraseña del usuario
+     */
     private void signInUser(String phone, String password) {
         if (Common.isConnectedToInternet(getBaseContext())) {
             // Guardamos el usuario y la contraseña (Paper)
@@ -105,8 +110,10 @@ public class SignIn extends AppCompatActivity {
                                     Toast.makeText(SignIn.this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
                             } else
                                 Toast.makeText(SignIn.this, "Por favor, inicie sesión con una cuenta con estatus de staff", Toast.LENGTH_SHORT).show();
-                        } else
+                        } else {
+                            mDialog.dismiss();
                             Toast.makeText(SignIn.this, "El usuario no existe en la BD", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     @Override
@@ -118,6 +125,10 @@ public class SignIn extends AppCompatActivity {
         }
     }
 
+    /**
+     * Método que muestra un cuadro de diálogo que nos permite recuperar nuestra contraseña,
+     * haciendo uso de nuestro código de seguridad
+     */
     private void showForgotPwdDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("¿Olvidó su conbtraseña?");

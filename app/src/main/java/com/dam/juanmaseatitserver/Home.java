@@ -1,42 +1,36 @@
 package com.dam.juanmaseatitserver;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Menu;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import com.dam.juanmaseatitserver.Common.Common;
-import com.dam.juanmaseatitserver.Interface.ItemClickListener;
-import com.dam.juanmaseatitserver.Model.Category;
-import com.dam.juanmaseatitserver.ViewHolder.MenuViewHolder;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import com.dam.juanmaseatitserver.Common.Common;
+import com.dam.juanmaseatitserver.Model.Category;
+import com.dam.juanmaseatitserver.ViewHolder.MenuViewHolder;
 import com.dam.juanmaseatitserver.databinding.ActivityHomeBinding;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -44,14 +38,14 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.rengwuxian.materialedittext.MaterialEditText;
-import com.squareup.picasso.Picasso;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import dmax.dialog.SpotsDialog;
 
+/**
+ * Clase que administra la pantalla Home de la aplicación
+ */
 public class Home extends AppCompatActivity {
     // Atributos de clase
     private AppBarConfiguration mAppBarConfiguration;
@@ -102,8 +96,8 @@ public class Home extends AppCompatActivity {
         drawer = homeBinding.drawerLayout;
         NavigationView navigationView = homeBinding.navView;
 
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+        // Pasar cada ID de menú como un conjunto de ID porque cada menú debe
+        // considerarse como destinos de nivel superior
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, /*R.id.nav_gallery,*/ R.id.nav_order_status)
                 .setOpenableLayout(drawer)
@@ -116,14 +110,6 @@ public class Home extends AppCompatActivity {
         View headerView = navigationView.getHeaderView(0);
         txtFullName = (TextView)headerView.findViewById(R.id.txtFullName);
         txtFullName.setText(Common.currentUser.getName());
-
-       // Inicializamos la vista (View)
-       //recycler_menu = (RecyclerView)findViewById(R.id.recycler_menu);
-       //recycler_menu.setHasFixedSize(true);
-       //layoutManager = new LinearLayoutManager(this);
-       //recycler_menu.setLayoutManager(layoutManager);
-
-        //loadMenu();
     }
 
     /**
@@ -181,6 +167,10 @@ public class Home extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Seleecione una imagen"), Common.PICK_IMAGE_REQUEST);
     }
 
+    /**
+     * Método que otorga la capacidad de subir imágenes seleccionadas previamente, al crear una
+     * categoría nueva
+     */
     private void uploadImage() {
         if (saveUri != null) {
             ProgressDialog mDialog = new ProgressDialog(this);
@@ -242,43 +232,46 @@ public class Home extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflar el menú; esto agrega elementos a la barra de acción si está presente.
         getMenuInflater().inflate(R.menu.home, menu);
         return true;
     }
 
+    /**
+     * Método que hace funcionar al menú desplegable (ActionMenu), y en el que se controlan las
+     * acciones que se llevarán a cabo al hacer clic sobre un elemnto de dicho menú
+     * @return Valor booleano que indica si se ha realizado la acción de navegación o no
+     */
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
 
-        homeBinding.navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case (R.id.nav_menu):
-                        navController.navigate(R.id.nav_home);
-                        Toast.makeText(Home.this, "Menu", Toast.LENGTH_SHORT).show();
-                        return true;
-                    case (R.id.nav_orders):
-                        navController.navigate(R.id.nav_order_status);
-                        Toast.makeText(Home.this, "Order status", Toast.LENGTH_SHORT).show();
-                        return true;
-                    case (R.id.nav_sign_out):
-                        Intent intent = new Intent(Home.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                        return true;
-                    case (R.id.nav_change_pwd):
-                        showChangePasswordDialog();
-                        return true;
-                    default: return false;
-                }
+        homeBinding.navView.setNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case (R.id.nav_menu):
+                    navController.navigate(R.id.nav_home);
+                    return true;
+                case (R.id.nav_orders):
+                    navController.navigate(R.id.nav_order_status);
+                    return true;
+                case (R.id.nav_sign_out):
+                    Intent intent = new Intent(Home.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                    return true;
+                case (R.id.nav_change_pwd):
+                    showChangePasswordDialog();
+                    return true;
+                default: return false;
             }
         });
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
 
+    /**
+     * Método que mostrará un cuadro de diálogo con la función de cambiar la contraseña actual
+     */
     private void showChangePasswordDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this);
         alertDialog.setTitle("CAMBIAR CONTRASEÑA");
@@ -336,86 +329,4 @@ public class Home extends AppCompatActivity {
 
         alertDialog.show();
     }
-
-    // Métodos para actualizar / borrar categorías
-    // TODO: No funcionan los dos onContextItemSelected a la vez, mover al HomeFragment
-    //@Override
-    //public boolean onContextItemSelected(@NonNull MenuItem item) {
-//
-    //    if (adapter == null) {
-    //        Toast.makeText(this, "El adapter es nulo", Toast.LENGTH_SHORT).show();
-    //        return false;
-    //    }
-//
-    //    if (item.getTitle().equals(Common.UPDATE)) {
-    //        showUpdateDialog(adapter.getRef(item.getOrder()).getKey(), adapter.getItem(item.getOrder()));
-    //    } else if (item.getTitle().equals(Common.DELETE)) {
-    //        deleteCategory(adapter.getRef(item.getOrder()).getKey());
-    //    }
-//
-    //    //return super.onContextItemSelected(item);
-    //    return true;
-    //}
-
-    //private void deleteCategory(String key) {
-    //    categories.child(key).removeValue();
-    //    Toast.makeText(this, "¡Categoría eliminada!", Toast.LENGTH_SHORT).show();
-    //}
-
-    //private void showUpdateDialog(String key, Category item) {
-    //    AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this);
-    //    alertDialog.setTitle("Actualizar categoría");
-    //    alertDialog.setMessage("Por favor, rellene toda la información");
-//
-    //    LayoutInflater inflater = this.getLayoutInflater();
-    //    View add_menu_layout = inflater.inflate(R.layout.add_new_menu_layout, null);
-//
-    //    edtName = add_menu_layout.findViewById(R.id.edtName);
-    //    btnSelect = add_menu_layout.findViewById(R.id.btnSelect);
-    //    btnUpload = add_menu_layout.findViewById(R.id.btnUpload);
-//
-    //    // Establecemos un nombre por defecto
-    //    edtName.setText(item.getName());
-//
-    //    // Evento para el botón
-    //    btnSelect.setOnClickListener(new View.OnClickListener() {
-    //        @Override
-    //        public void onClick(View view) {
-    //            // Esto permitirá al usuario elegir una imagen de la galería y salvar su URI
-    //            chooseImage();
-    //        }
-    //    });
-//
-    //    btnUpload.setOnClickListener(new View.OnClickListener() {
-    //        @Override
-    //        public void onClick(View view) {
-    //            changeImage(item);
-    //        }
-    //    });
-//
-    //    alertDialog.setView(add_menu_layout);
-    //    alertDialog.setIcon(R.drawable.baseline_shopping_cart_24);
-//
-    //    // Establecemos el botón
-    //    alertDialog.setPositiveButton("SÍ", new DialogInterface.OnClickListener() {
-    //        @Override
-    //        public void onClick(DialogInterface dialog, int which) {
-    //            dialog.dismiss();
-//
-    //            // Actualizamos la información
-    //            item.setName(edtName.getText().toString());
-    //            categories.child(key).setValue(item);
-    //        }
-    //    });
-//
-    //    alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-    //        @Override
-    //        public void onClick(DialogInterface dialog, int which) {
-//
-    //            dialog.dismiss();
-    //        }
-    //    });
-//
-    //    alertDialog.show();
-    //}
 }

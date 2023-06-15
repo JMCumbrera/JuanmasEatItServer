@@ -9,10 +9,10 @@
             android:icon="@drawable/baseline_restaurant_24"
             android:title="@string/menu" />
 
-        <item
+        <!--<item
             android:id="@+id/nav_cart"
             android:icon="@drawable/baseline_shopping_cart_24"
-            android:title="@string/carro" />
+            android:title="@string/carro" />-->
 
         <item
             android:id="@+id/nav_orders"
